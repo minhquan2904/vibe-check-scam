@@ -1,56 +1,63 @@
 # Vibe Coding: Check Scam Project
 
-Welcome to the **Check Scam** project! This repository is built using the **Vibe Coding** methodology, leveraging **OpenSpec** for dynamic requirement specifications and the **Antigravity Kit** (AI Agent Assistant) to drive automated development, code scanning, và duy trì tính nhất quán của hệ thống.
+Welcome to the **Check Scam** project! This repository is built using the **Vibe Coding** methodology, leveraging **OpenSpec** for dynamic requirement specifications and the **Antigravity Kit** (AI Agent Assistant) to drive automated development, code scanning, and maintain system consistency.
 
-## 🚀 Tổng quan (Overview)
+## 🚀 Overview
 
-Dự án này áp dụng luồng phát triển phần mềm AI-assisted (AI hỗ trợ chủ động). Bằng cách sử dụng các AI Agent dựa trên LLM (Antigravity Kit), chúng tôi tự động hóa các tác vụ từ phân tích yêu cầu, sinh database, xây dựng API, cho đến code review và quét bảo mật.
+This project embodies an AI-assisted software development workflow. By utilizing LLM-based agents (Antigravity Kit), we automate tasks ranging from requirement analysis, database generation, and API building, to code review and security scanning.
 
-- **Phương pháp luận (Methodology)**: Vibe Coding (Lập trình dựa trên định hướng LLM)
-- **Quản lý thiết kế (Spec Management)**: OpenSpec
-- **Công cụ AI (AI Tooling)**: Antigravity Kit
+- **Methodology**: Vibe Coding (LLM-driven programming)
+- **Spec Management**: OpenSpec
+- **AI Tooling**: Antigravity Kit
 
-## 📂 Cấu trúc dự án (Project Structure)
+## 📂 Project Structure
 
-Dự án được chia module rõ ràng nhằm cô lập hoàn toàn giữa Frontend, Backend, tài liệu thiết kế nghiệp vụ và cấu hình Agent:
+The project features a highly modular structure to strictly isolate the Frontend, Backend, business design documents, and Agent configurations:
 
-- `api/`: Mã nguồn Backend (được xây dựng bằng C# ASP.NET Core). Các service API cốt lõi nằm ở `api/api-vibe`.
-- `web/`: Mã nguồn Web Frontend (Angular).
-- `openspec/`: Chứa các đặc tả API (`yaml`), schemas, tài liệu thiết kế và yêu cầu thay đổi (change proposals). AI Agent sẽ đọc OpenAPI và specs ở đây để hiểu task trước khi sinh code.
-- `base_knowledge/`: Nền tảng tri thức trung tâm. Chứa các quy chuẩn code (coding standards), hướng dẫn kiến trúc, quy tắc quét bảo mật (security/convention checker) mà AI Agent PHẢI tuân theo nghiêm ngặt.
-- `.agent/`: Định nghĩa các Workflows và Skills cho Antigravity Kit. Hỗ trợ agent thực thi các tác vụ như `/table-gen` (sinh DDL PostgreSQL/Oracle), scan source .NET, v.v.
+- `api/`: Backend source code (built with C# ASP.NET Core). Core API services are located in `api/api-vibe`.
+- `web/`: Frontend Web source code (Angular).
+- `openspec/`: Contains API specifications (`yaml`), schemas, design documents, and change proposals. The AI Agent reads OpenAPI definitions and specs here to comprehend tasks before generating code.
+- `base_knowledge/`: The central knowledge base. It contains coding standards, architectural guidelines, and security/convention checker rules that the AI Agent MUST strictly abide by.
+- `.agent/`: Defines Workflows and Skills for the Antigravity Kit. Assists the agent in executing tasks such as `/table-gen` (generating PostgreSQL/Oracle DDLs), scanning .NET sources, etc.
 
-## 🤖 Tích hợp Antigravity & OpenSpec
+## 🤖 Antigravity & OpenSpec Integration
 
-Trong dự án này, quy trình lập trình được thay đổi:
-1. **Thiết kế** (Define): Viết và đặc tả yêu cầu, API schemas bên trong `openspec/`.
-2. **Quy chuẩn** (Guardrails): Áp dụng các rules chặt chẽ từ thư mục `base_knowledge/` (ví dụ: `PRJ-03-dotnet-scan-rule`, `PRJ-04-angular-scan-rule`).
-3. **Thực thi** (Command): Ra lệnh cho Antigravity Agent thông qua các slash commands. Agent sẽ tự động đọc spec, quét rule, phân tích và sinh ra code đáp ứng production vào `api/` hoặc `web/`.
+In this project, the programming workflow is transformed:
 
-## 🛠️ Hướng dẫn khởi chạy (Getting Started)
+1. **Define**: Write and specify requirements and API schemas inside `openspec/`.
+2. **Guardrails**: Apply strict rules from the `base_knowledge/` directory (e.g., `PRJ-03-dotnet-scan-rule`, `PRJ-04-angular-scan-rule`).
+3. **Command**: Command the Antigravity Agent via slash commands. The agent will automatically read the specs, scan the rules, analyze, and generate production-ready code into `api/` or `web/`.
 
-### Yêu cầu hệ thống (Prerequisites)
-- SDK .NET tương ứng (dành cho API Backend)
-- Node.js & Angular CLI (dành cho Web Frontend)
-- Môi trường đã bật/cài đặt **Gemini Antigravity Kit**
+## 🛠️ Getting Started
 
-### Chạy Backend (API)
+### Prerequisites
+
+- The respective .NET SDK (for the API Backend)
+- Node.js & Angular CLI (for the Web Frontend)
+- An environment with **Gemini Antigravity Kit** enabled/installed
+
+### Running the Backend (API)
+
 ```bash
 cd api/api-vibe
 dotnet restore
 dotnet run
 ```
 
-### Chạy Frontend (Web)
-*(Thư mục Web hiện đang được thiết lập dự kiến)*
+### Running the Frontend (Web)
+
+_(The Web directory is currently set up conceptually)_
+
 ```bash
 cd web
 npm install
 npm start
 ```
 
-## 🛡️ Bảo mật & Tiêu chuẩn (Security & Standards)
-Toàn bộ code được sinh ra hoặc commit đều có thể được tự động quét (scan) đối chiếu với các `common_rules` nằm tại `base_knowledge/`. Dự án chủ trương Clean Code, không lưu trữ thông tin nhạy cảm (hardcoded secrets, tokens, connection strings) ở dạng plain text, và tách biệt rạch ròi trách nhiệm giữa các tầng ứng dụng.
+## 🛡️ Security & Standards
+
+All generated codebase or commits can be automatically scanned and cross-referenced against the `common_rules` located at `base_knowledge/`. The project champions Clean Code, restricts the storage of sensitive information (hardcoded secrets, tokens, connection strings) in plain text, and maintains a strict separation of concerns between application layers.
 
 ---
-*Dự án được phát triển và tối ưu thông qua trải nghiệm lập trình AI-assisted.*
+
+_This project is developed and optimized through an AI-assisted coding experience._

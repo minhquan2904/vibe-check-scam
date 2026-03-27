@@ -1,0 +1,11 @@
+id: "CHECKSCAM260327A1B2C"
+name: "transaction-ingestion"
+type: "new-feature"
+created: "2026-03-27T15:31:03+07:00"
+summary: "Phân tích raw text sao kê (VCB, BIDV, MB) hoặc CSV thành dữ liệu có cấu trúc thông qua AI."
+service:
+  - "TransactionIngestionService"
+path:
+  - "/api/v1/transactions/ingest"
+confluence: []
+jira: []
