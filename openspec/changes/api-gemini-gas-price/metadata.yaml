@@ -1,0 +1,11 @@
+id: "APIVIBE260327GAS"
+name: "api-gemini-gas-price"
+type: "new-feature"
+created: "2026-03-27T14:15:00+07:00"
+summary: "API gọi external service (Gemini) để check giá xăng hôm nay"
+service:
+  - "ApiVibe"
+path:
+  - "GET /api/v1/gas-price/today"
+confluence: []
+jira: []

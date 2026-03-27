@@ -1,0 +1,131 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|d:\\9. learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|d:\\9. learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\controllers\\gaspricecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|solutionrelative:controllers\\gaspricecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|d:\\9. learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\healthcheck\\checks\\databasehealthcheck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|solutionrelative:healthcheck\\checks\\databasehealthcheck.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|d:\\9. learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\controllers\\healthcheckcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|solutionrelative:controllers\\healthcheckcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|d:\\9. learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{999EF649-1A9E-40BC-B9DD-116FB67C9FED}|api-vibe.csproj|solutionrelative:controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 700,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ViewState": "AgIAAPkUAAAAAAAAAAAowBEVAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-03-27T07:41:12.927Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "GasPriceController.cs",
+              "DocumentMoniker": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\Controllers\\GasPriceController.cs",
+              "RelativeDocumentMoniker": "Controllers\\GasPriceController.cs",
+              "ToolTip": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\Controllers\\GasPriceController.cs",
+              "RelativeToolTip": "Controllers\\GasPriceController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABkAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-27T07:30:29.365Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-03-27T06:56:05.811Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "DatabaseHealthCheck.cs",
+              "DocumentMoniker": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\HealthCheck\\Checks\\DatabaseHealthCheck.cs",
+              "RelativeDocumentMoniker": "HealthCheck\\Checks\\DatabaseHealthCheck.cs",
+              "ToolTip": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\HealthCheck\\Checks\\DatabaseHealthCheck.cs",
+              "RelativeToolTip": "HealthCheck\\Checks\\DatabaseHealthCheck.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAgwCgAAABSAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-27T06:55:03.197Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "HealthCheckController.cs",
+              "DocumentMoniker": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\Controllers\\HealthCheckController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HealthCheckController.cs",
+              "ToolTip": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\Controllers\\HealthCheckController.cs",
+              "RelativeToolTip": "Controllers\\HealthCheckController.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAowA4AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-27T06:54:55.586Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "WeatherForecastController.cs",
+              "DocumentMoniker": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\Controllers\\WeatherForecastController.cs",
+              "RelativeDocumentMoniker": "Controllers\\WeatherForecastController.cs",
+              "ToolTip": "D:\\9. Learn\\8. vibe coding\\1. check scam\\api\\api-vibe\\Controllers\\WeatherForecastController.cs",
+              "RelativeToolTip": "Controllers\\WeatherForecastController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-27T06:54:54.849Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

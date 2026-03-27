@@ -1,0 +1,1216 @@
+openapi: 3.0.3
+
+info:
+  title: Check Scam API
+  description: |
+    API specification for the Check Scam platform, covering two core services:
+    - **Transaction Ingestion**: Parse raw bank statements (Vietcombank, BIDV, MB...) or CSV uploads into structured data.
+    - **Scam Word Detector**: AI-powered scanning of transaction content to flag suspicious patterns.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@checkscam.io
+
+servers:
+  - url: https://api.checkscam.io/v1
+    description: Production
+  - url: https://staging-api.checkscam.io/v1
+    description: Staging
+
+# =============================================
+# SECURITY
+# =============================================
+security:
+  - BearerAuth: []
+
+# =============================================
+# TAGS
+# =============================================
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Users
+    description: User management
+  - name: Transactions
+    description: Transaction Ingestion — parse bank statements / CSV into structured data
+  - name: Scam Detection
+    description: Scam Word Detector — AI-powered scan of transaction content
+
+# =============================================
+# PATHS
+# =============================================
+paths:
+
+  # ------------------------------------------
+  # AUTH
+  # ------------------------------------------
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and obtain JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token using refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ------------------------------------------
+  # USERS
+  # ------------------------------------------
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users (admin only)
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Users]
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      responses:
+        '200':
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Users]
+      summary: Update user by ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Users]
+      summary: Delete user by ID
+      responses:
+        '204':
+          description: User deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ------------------------------------------
+  # SERVICE 1: TRANSACTION INGESTION
+  # ------------------------------------------
+  /transactions:
+    get:
+      tags: [Transactions]
+      summary: List all parsed transactions for the current user
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: bank
+          in: query
+          description: Filter by bank name
+          schema:
+            type: string
+            enum: [VIETCOMBANK, BIDV, MB, TECHCOMBANK, OTHER]
+        - name: status
+          in: query
+          description: Filter by parsing state
+          schema:
+            $ref: '#/components/schemas/TransactionIngestionStatus'
+      responses:
+        '200':
+          description: Paginated list of transaction batches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionBatchListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions/ingest/text:
+    post:
+      tags: [Transactions]
+      summary: Ingest raw bank statement text (paste mode)
+      description: |
+        Accepts raw bank statement text (e.g., copy-paste from Vietcombank, BIDV, MB internet banking).
+        Initiates async parsing. Use polling or webhook to track state: `idle → parsing → parsed / error`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTextRequest'
+      responses:
+        '202':
+          description: Accepted — parsing initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionBatchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions/ingest/csv:
+    post:
+      tags: [Transactions]
+      summary: Ingest bank statement via CSV file upload
+      description: |
+        Upload a CSV file exported from internet banking.
+        Initiates async parsing. State transitions: `idle → parsing → parsed / error`.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, bank]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: CSV file (max 10MB)
+                bank:
+                  type: string
+                  enum: [VIETCOMBANK, BIDV, MB, TECHCOMBANK, OTHER]
+                  description: Source bank to apply correct parsing template
+      responses:
+        '202':
+          description: Accepted — parsing initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionBatchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions/{batchId}:
+    parameters:
+      - name: batchId
+        in: path
+        required: true
+        description: Transaction batch ID returned on ingestion
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Transactions]
+      summary: Get parsed transaction batch detail
+      description: Poll this endpoint to check parsing state and retrieve structured transactions.
+      responses:
+        '200':
+          description: Transaction batch with parsed items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionBatchResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Transactions]
+      summary: Update / re-trigger parsing for a batch
+      description: Re-submit raw content or override bank type to re-parse an existing batch.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTextRequest'
+      responses:
+        '202':
+          description: Accepted — re-parsing initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionBatchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Transactions]
+      summary: Delete a transaction batch
+      responses:
+        '204':
+          description: Batch deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions/{batchId}/items/{transactionId}:
+    parameters:
+      - name: batchId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Transactions]
+      summary: Get a single parsed transaction item
+      responses:
+        '200':
+          description: Transaction item detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ------------------------------------------
+  # SERVICE 2: SCAM WORD DETECTOR
+  # ------------------------------------------
+  /scam-detections:
+    get:
+      tags: [Scam Detection]
+      summary: List all scam scan results for the current user
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: riskLevel
+          in: query
+          description: Filter by risk level
+          schema:
+            $ref: '#/components/schemas/RiskLevel'
+      responses:
+        '200':
+          description: Paginated list of scan results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamDetectionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /scam-detections/scan/text:
+    post:
+      tags: [Scam Detection]
+      summary: Scan raw text content for scam patterns
+      description: |
+        Submit free-form transfer description text for AI-powered scam word analysis.
+        Returns highlighted suspicious patterns with explanations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanTextRequest'
+      responses:
+        '200':
+          description: Scan result with flagged patterns
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamDetectionResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /scam-detections/scan/batch:
+    post:
+      tags: [Scam Detection]
+      summary: Bulk scan a transaction batch from ingestion
+      description: |
+        Trigger scam detection on all transaction items within a previously parsed batch.
+        Results are persisted and can be retrieved per detection ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanBatchRequest'
+      responses:
+        '202':
+          description: Batch scan initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamDetectionBatchResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /scam-detections/{detectionId}:
+    parameters:
+      - name: detectionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Scam Detection]
+      summary: Get scam detection result by ID
+      responses:
+        '200':
+          description: Detection result detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamDetectionResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Scam Detection]
+      summary: Update detection result (e.g., mark as false positive)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDetectionRequest'
+      responses:
+        '200':
+          description: Detection result updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamDetectionResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Scam Detection]
+      summary: Delete a scam detection record
+      responses:
+        '204':
+          description: Detection record deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /scam-detections/keywords:
+    get:
+      tags: [Scam Detection]
+      summary: Get list of scam keyword patterns in use
+      responses:
+        '200':
+          description: List of scam keyword rules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScamKeyword'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Scam Detection]
+      summary: Add a custom scam keyword rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScamKeywordRequest'
+      responses:
+        '201':
+          description: Keyword rule created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamKeyword'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /scam-detections/keywords/{keywordId}:
+    parameters:
+      - name: keywordId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    put:
+      tags: [Scam Detection]
+      summary: Update a scam keyword rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScamKeywordRequest'
+      responses:
+        '200':
+          description: Keyword rule updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScamKeyword'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Scam Detection]
+      summary: Delete a scam keyword rule
+      responses:
+        '204':
+          description: Keyword deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# =============================================
+# COMPONENTS
+# =============================================
+components:
+
+  # ------------------------------------------
+  # SECURITY SCHEMES
+  # ------------------------------------------
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Use `Authorization: Bearer <token>` header.
+        Obtain token via `POST /auth/login`.
+
+  # ------------------------------------------
+  # PARAMETERS
+  # ------------------------------------------
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: Unique user identifier (UUID)
+      schema:
+        type: string
+        format: uuid
+
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-based)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSizeParam:
+      name: pageSize
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  # ------------------------------------------
+  # RESPONSES (Reusable Error Responses)
+  # ------------------------------------------
+  responses:
+    BadRequest:
+      description: Bad Request — invalid input or validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 400
+            error: BAD_REQUEST
+            message: "Validation failed: 'bank' is required."
+            details:
+              - field: bank
+                issue: This field is required
+
+    Unauthorized:
+      description: Unauthorized — missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            error: UNAUTHORIZED
+            message: "JWT token is missing or expired."
+            details: []
+
+    NotFound:
+      description: Not Found — requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 404
+            error: NOT_FOUND
+            message: "Resource not found."
+            details: []
+
+    InternalServerError:
+      description: Internal Server Error — unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 500
+            error: INTERNAL_SERVER_ERROR
+            message: "An unexpected error occurred. Please try again later."
+            details: []
+
+  # ------------------------------------------
+  # SCHEMAS
+  # ------------------------------------------
+  schemas:
+
+    # ---- COMMON ----
+    ErrorResponse:
+      type: object
+      required: [code, error, message]
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+          example: 400
+        error:
+          type: string
+          description: Machine-readable error identifier
+          example: BAD_REQUEST
+          enum:
+            - BAD_REQUEST
+            - UNAUTHORIZED
+            - NOT_FOUND
+            - INTERNAL_SERVER_ERROR
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: array
+          description: Field-level validation errors (optional)
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              issue:
+                type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 150
+        totalPages:
+          type: integer
+          example: 8
+
+    # ---- USER ----
+    User:
+      type: object
+      description: Reusable User model
+      required: [id, email, fullName, role, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        fullName:
+          type: string
+          example: "Nguyen Van A"
+        role:
+          type: string
+          enum: [ADMIN, USER]
+          example: USER
+        isActive:
+          type: boolean
+          default: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+
+    UserListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    CreateUserRequest:
+      type: object
+      required: [email, fullName, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: "newuser@example.com"
+        fullName:
+          type: string
+          example: "Tran Thi B"
+        password:
+          type: string
+          format: password
+          minLength: 8
+        role:
+          type: string
+          enum: [ADMIN, USER]
+          default: USER
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, USER]
+        isActive:
+          type: boolean
+
+    # ---- AUTH ----
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token (short-lived)
+        refreshToken:
+          type: string
+          description: Refresh token (long-lived)
+        expiresIn:
+          type: integer
+          description: Access token TTL in seconds
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    # ---- SERVICE 1: TRANSACTION INGESTION ----
+    TransactionIngestionStatus:
+      type: string
+      description: |
+        State machine for transaction batch parsing:
+        - `idle` — batch created, not yet processed
+        - `parsing` — AI is actively parsing the content
+        - `parsed` — parsing completed successfully
+        - `error` — parsing failed
+      enum: [idle, parsing, parsed, error]
+      example: parsed
+
+    BankSource:
+      type: string
+      enum: [VIETCOMBANK, BIDV, MB, TECHCOMBANK, OTHER]
+      example: VIETCOMBANK
+
+    TransactionType:
+      type: string
+      enum: [CREDIT, DEBIT]
+      description: Credit = money received, Debit = money sent
+
+    IngestTextRequest:
+      type: object
+      required: [rawText, bank]
+      properties:
+        rawText:
+          type: string
+          description: Raw copy-pasted bank statement text
+          example: |
+            15/03/2024 10:30 +5,000,000 VND TK: 0123456789 ND: Chuyen tien dau tu
+        bank:
+          $ref: '#/components/schemas/BankSource'
+        label:
+          type: string
+          description: Optional label / note for this batch
+          example: "Sao kê tháng 3/2024"
+
+    TransactionItem:
+      type: object
+      description: A single structured transaction row parsed from raw input
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date-time
+          description: Transaction date and time
+          example: "2024-03-15T10:30:00+07:00"
+        amount:
+          type: number
+          format: double
+          description: Absolute transaction amount in VND
+          example: 5000000
+        type:
+          $ref: '#/components/schemas/TransactionType'
+        balance:
+          type: number
+          format: double
+          description: Account balance after transaction
+          example: 23500000
+        description:
+          type: string
+          description: Raw transfer description / nội dung chuyển khoản
+          example: "Chuyen tien dau tu sinh loi"
+        counterpart:
+          type: string
+          description: Counter account or party name
+          example: "NGUYEN VAN SCAM"
+        rawLine:
+          type: string
+          description: Original unparsed line for traceability
+
+    TransactionBatchResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            label:
+              type: string
+            bank:
+              $ref: '#/components/schemas/BankSource'
+            status:
+              $ref: '#/components/schemas/TransactionIngestionStatus'
+            errorMessage:
+              type: string
+              description: Populated when status = error
+              nullable: true
+            totalItems:
+              type: integer
+              description: Total parsed transaction rows
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionItem'
+            createdBy:
+              $ref: '#/components/schemas/User'
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    TransactionBatchListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionBatchResponse'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # ---- SERVICE 2: SCAM WORD DETECTOR ----
+    RiskLevel:
+      type: string
+      description: |
+        AI-assessed risk classification:
+        - `safe` — no suspicious patterns found
+        - `low` — minor suspicious signals
+        - `medium` — notable scam indicators
+        - `high` — strong scam patterns detected
+      enum: [safe, low, medium, high]
+      example: high
+
+    ScamFlag:
+      type: object
+      description: A single detected suspicious pattern within the scanned text
+      properties:
+        keyword:
+          type: string
+          description: The matched scam keyword or phrase
+          example: "đầu tư sinh lời"
+        startIndex:
+          type: integer
+          description: Character start position in the original text
+        endIndex:
+          type: integer
+          description: Character end position in the original text
+        category:
+          type: string
+          description: Category of scam type
+          enum:
+            - GAMBLING        # cọc, đặt cược
+            - INVESTMENT_FRAUD # đầu tư sinh lời, lợi nhuận cao
+            - REFUND_SCAM     # hoàn tiền gấp, trả tiền ngay
+            - ROMANCE_SCAM    # yêu xa, người thân cần tiền
+            - PHISHING        # xác nhận tài khoản, OTP
+            - OTHER
+        explanation:
+          type: string
+          description: Human-readable explanation of why this is suspicious
+          example: "Cụm từ 'đầu tư sinh lời' thường xuất hiện trong các chiều trò lừa đảo đầu tư tài chính."
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: AI confidence score for this flag
+          example: 0.95
+
+    ScanTextRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          description: Transfer description or free-form text to scan
+          example: "Chuyển tiền cọc đầu tư sinh lời, hoàn tiền gấp sau 7 ngày"
+        transactionId:
+          type: string
+          format: uuid
+          description: Optional — link scan result to a parsed transaction item
+          nullable: true
+
+    ScanBatchRequest:
+      type: object
+      required: [batchId]
+      properties:
+        batchId:
+          type: string
+          format: uuid
+          description: ID of a previously parsed transaction batch to scan
+
+    ScamDetectionResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+          description: Original scanned content
+        riskLevel:
+          $ref: '#/components/schemas/RiskLevel'
+        riskScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Overall risk score (0.0 = safe, 1.0 = high risk)
+          example: 0.88
+        flags:
+          type: array
+          description: Detected scam patterns with highlighting info
+          items:
+            $ref: '#/components/schemas/ScamFlag'
+        isFalsePositive:
+          type: boolean
+          default: false
+          description: User-reported false positive override
+        falsePositiveNote:
+          type: string
+          nullable: true
+          description: User's note when marking as false positive
+        transactionId:
+          type: string
+          format: uuid
+          nullable: true
+        scannedBy:
+          $ref: '#/components/schemas/User'
+        scannedAt:
+          type: string
+          format: date-time
+
+    ScamDetectionListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScamDetectionResult'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    ScamDetectionBatchResult:
+      type: object
+      properties:
+        batchId:
+          type: string
+          format: uuid
+        totalScanned:
+          type: integer
+        summary:
+          type: object
+          properties:
+            safe:
+              type: integer
+            low:
+              type: integer
+            medium:
+              type: integer
+            high:
+              type: integer
+        detections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScamDetectionResult'
+
+    UpdateDetectionRequest:
+      type: object
+      properties:
+        isFalsePositive:
+          type: boolean
+        falsePositiveNote:
+          type: string
+          maxLength: 500
+
+    ScamKeyword:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        keyword:
+          type: string
+          example: "cọc"
+        category:
+          type: string
+          enum: [GAMBLING, INVESTMENT_FRAUD, REFUND_SCAM, ROMANCE_SCAM, PHISHING, OTHER]
+        description:
+          type: string
+          example: "Từ liên quan đến đặt cọc trong giao dịch bất hợp pháp"
+        isActive:
+          type: boolean
+          default: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateScamKeywordRequest:
+      type: object
+      required: [keyword, category]
+      properties:
+        keyword:
+          type: string
+          minLength: 2
+          maxLength: 100
+        category:
+          type: string
+          enum: [GAMBLING, INVESTMENT_FRAUD, REFUND_SCAM, ROMANCE_SCAM, PHISHING, OTHER]
+        description:
+          type: string
+          maxLength: 500
+        isActive:
+          type: boolean
+          default: true

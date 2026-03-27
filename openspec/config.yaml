@@ -1,0 +1,46 @@
+schema: spec-driven
+
+# =====================================
+# ENVIRONMENT
+# =====================================
+environment:
+  language: vi-VN
+
+  tech_stack:
+    - C#
+    - .NET 9
+    - Entity Framework Core
+    - PostgreSQL
+    - Angular 21
+    - TypeScript
+    - Local cache
+
+# =====================================
+# GLOBAL RULES (BASELINE)
+# =====================================
+rules:
+  - MUST use collected input sources as single source of truth
+  - MUST NOT invent requirements outside provided inputs
+  - MUST ensure full traceability: Requirement → Spec → Design → Task
+  - MUST validate consistency before finishing output
+  - Each workflow step runs in a separate conversation — read previous artifacts from disk
+
+# =====================================
+# MERGE STRATEGY
+# =====================================
+merge:
+  context: append
+  rules: append
+  skills: append
+
+# =====================================
+# PROMPT BUILD STRATEGY
+# =====================================
+prompt:
+  structure:
+    - ENVIRONMENT
+    - RULES
+    - SKILLS
+    - CONTEXT
+    - INPUT
+    - TASK

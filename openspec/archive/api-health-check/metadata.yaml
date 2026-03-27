@@ -1,0 +1,17 @@
+name: api-health-check
+created_at: 2026-03-27
+type: NEWBUILD
+flow_type: Query
+status: planning
+
+description: >
+  Expose an API Health Check endpoint that allows infrastructure tools,
+  load balancers, and monitoring systems to verify service liveness and
+  readiness. Returns structured status information about the service and
+  its key dependencies (database, cache, external integrations).
+
+tags:
+  - health
+  - monitoring
+  - infrastructure
+  - query
