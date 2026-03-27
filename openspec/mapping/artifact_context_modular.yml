@@ -1,0 +1,78 @@
+# =======================================
+# MODULAR FEATURE PIPELINE — Context Mapping
+# =======================================
+# Used by pipeline steps (workflows/steps/*)
+# Referenced by: pipelines/feature-pipeline.md
+#
+# ENFORCEMENT: Mọi item trong `required_rules` và `required_skills`
+# PHẢI được đọc trước khi sinh artifact. Nếu file không tồn tại → HALT.
+
+# ---- SHARED: SYS rules (loaded by ALL steps) ----
+_sys_rules: &sys_rules
+  - .agent/common_rules/SYS-01-system-scope.md
+  - .agent/common_rules/SYS-02-workflow-constraint.md
+  - .agent/common_rules/SYS-03-reflection-critique.md
+  - .agent/common_rules/SYS-04-tool-usage.md
+  - .agent/common_rules/SYS-05-coding-discipline.md
+
+# =======================================
+# ARTIFACT: PROPOSAL (steps/init)
+# =======================================
+proposal:
+  context:
+    - base_knowledge/structures/propose/**
+  required_rules: *sys_rules
+  required_skills: []
+
+# =======================================
+# ARTIFACT: SRS (steps/srs)
+# =======================================
+srs:
+  context:
+    - base_knowledge/structures/propose/**
+  required_rules:
+    - *sys_rules
+    - base_knowledge/common_rules/PRJ-10-planning-feature-rule.md
+  required_skills: []
+
+# =======================================
+# ARTIFACT: SPECS (steps/specs)
+# =======================================
+specs:
+  context:
+    - base_knowledge/structures/propose/**
+  required_rules:
+    - *sys_rules
+    - base_knowledge/common_rules/PRJ-10-planning-feature-rule.md
+  required_skills: []
+
+# =======================================
+# ARTIFACT: DESIGN (steps/design)
+# =======================================
+design:
+  context:
+    - base_knowledge/structures/propose/**
+  required_rules:
+    - *sys_rules
+    - base_knowledge/common_rules/PRJ-10-planning-feature-rule.md
+  required_skills: []
+
+# =======================================
+# ARTIFACT: TASKS (steps/tasks)
+# =======================================
+tasks:
+  context:
+    - base_knowledge/structures/propose/**
+  required_rules: *sys_rules
+  required_skills: []
+
+# =======================================
+# ARTIFACT: APPLY (steps/apply — CODE GENERATION)
+# =======================================
+apply:
+  context:
+    - base_knowledge/structures/apply/**
+    - base_knowledge/structures/propose/**
+  required_rules: *sys_rules
+  required_skills:
+    - base_knowledge/standards/**

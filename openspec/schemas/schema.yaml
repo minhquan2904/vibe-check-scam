@@ -1,0 +1,222 @@
+name: modular_feature
+version: 1
+
+description: >
+  Modular feature development pipeline.
+  Each artifact is generated in a separate conversation to avoid context window overflow.
+  Input is direct user description + multi-source collection (no pre_openspec.md).
+
+# =====================================
+# ARTIFACTS
+# =====================================
+artifacts:
+  # =====================================
+  # 1. PROPOSAL
+  # =====================================
+  - id: proposal
+    generates: proposal.md
+    description: >
+      Feature proposal — define business flow, scope, impacted services, and high-level analysis.
+
+    template: proposal.md
+
+    instruction: |
+      Analyze user-provided input (description, Confluence pages, documentation files, codebase references).
+      This is the ONLY source of truth.
+
+      Determine:
+      - Business flow type (Command / Query / Financial / NonFinancial)
+      - Affected microservices and modules
+      - External integrations
+      - Dependencies and risks
+      - High-level impact
+
+      MUST:
+      - NOT include implementation details
+      - Ensure all requirements are considered
+      - Follow business analysis rules from context
+
+    requires: []
+
+  # =====================================
+  # 2. SRS (consolidated requirements)
+  # =====================================
+  - id: srs
+    generates: srs.md
+    description: >
+      Software Requirements Specification — consolidated document from all input sources.
+      Generated AFTER proposal, BEFORE design and specs.
+
+    template: srs.md
+
+    instruction: |
+      Consolidate proposal and all collected inputs into a complete SRS.
+
+      Determine flow type:
+      - Command / Query → ONLY Phase 1
+      - Financial → Phase 1 + 2 + 3
+      - NonFinancial → Phase 1 + Phase 3
+
+      MUST:
+      - NOT duplicate content from proposal
+      - Include API specification per phase
+      - Include Request/Response tables
+      - Include Processing flow
+      - Include Error scenarios
+      - Include Demo API
+      - Include Aggregated error codes
+
+      Financial flow:
+      - MUST include Revert Chain
+
+      Maintenance feature:
+      - MUST include Change Delta section
+
+    requires:
+      - proposal
+
+  # =====================================
+  # 3. SPECS (DELTA BEHAVIOR)
+  # =====================================
+  - id: specs
+    generates: specs/**/*.md
+    description: >
+      Behavioral specifications using delta format (ADDED / MODIFIED / REMOVED).
+
+    template: spec.md
+
+    instruction: |
+      Create delta specifications for the feature.
+
+      Output:
+      specs/<domain>/spec.md
+
+      MUST:
+      - Write ONLY:
+        - ADDED
+        - MODIFIED
+        - REMOVED
+
+      - Each requirement MUST:
+        - Map to requirements from proposal/srs
+        - Include at least 1 Scenario (GIVEN / WHEN / THEN)
+
+      - Use RFC 2119 keywords: MUST, SHALL, SHOULD, MAY
+
+      - MUST NOT:
+        - Lose any requirement
+        - Duplicate requirements
+        - Add implementation detail
+
+    requires:
+      - proposal
+      - srs
+
+  # =====================================
+  # 4. DESIGN
+  # =====================================
+  - id: design
+    generates: design.md
+    description: >
+      Technical design — architecture mapping, API contract, data model, and component structure.
+
+    template: design.md
+
+    instruction: |
+      Create technical design based on srs and specs.
+
+      MUST:
+      - Follow microservice architecture from context
+      - Map FULL layers:
+        controller → service → repository → integration → dto → model
+
+      - Define:
+        - API endpoints (request/response)
+        - DTO structures
+        - Validation rules
+        - Entity schema
+        - Cache strategy (if applicable)
+        - Error codes
+        - Repository queries
+
+      - Select base classes based on patterns in context
+
+      - MUST NOT:
+        - Skip any layer
+        - Invent logic outside specs
+
+    requires:
+      - proposal
+      - srs
+      - specs
+
+  # =====================================
+  # 5. TASKS
+  # =====================================
+  - id: tasks
+    generates: tasks.md
+    description: >
+      Implementation tasks — ordered by layer and dependency.
+
+    template: tasks.md
+
+    instruction: |
+      Break down implementation into tasks.
+
+      MUST:
+      - Follow layer order
+
+      Each task MUST include:
+      - File to create
+      - Package path
+      - Base class reference
+      - Dependency mapping
+
+      MUST:
+      - Cover all specs
+      - Maintain traceability: Requirement → Spec → Task
+
+    requires:
+      - specs
+      - design
+
+  # =====================================
+  # 6. APPLY (CODE IMPLEMENTATION)
+  # =====================================
+  - id: apply
+    generates: code/**
+    description: >
+      Generate implementation code based on tasks and design.
+
+    template: none
+
+    instruction: |
+      Generate code based on tasks.md and design.md.
+
+      MUST:
+      - Follow coding standards from context
+      - Follow full microservice architecture
+      - Implement ALL layers:
+        controller, service, repository, integration, dto, model
+
+      - Follow:
+        - Naming conventions
+        - Base classes
+        - Error handling standards
+        - Logging standards
+
+      MUST NOT:
+      - Skip tasks
+      - Invent logic outside design/specs
+
+    requires:
+      - tasks
+
+# =====================================
+# APPLY CONFIG
+# =====================================
+apply:
+  requires:
+    - tasks
+
+  tracks: tasks.md
