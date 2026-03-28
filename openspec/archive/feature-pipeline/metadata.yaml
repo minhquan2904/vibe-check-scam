@@ -1,0 +1,11 @@
+id: "API-VIBE260328S8K2L"
+name: "feature-pipeline"
+type: "new-feature"
+created: "2026-03-28T21:29:23+07:00"
+summary: "Nhận raw text là danh sách sao kê ngân hàng và phân loại giao dịch cũng như kiểm tra xem có dấu hiệu lừa đảo không. Kiểm tra bằng cách gọi api của gemini."
+service:
+  - "FeaturePipelineService"
+path:
+  - "/api/v1/check-scam"
+confluence: []
+jira: []

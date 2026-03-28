@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using api_vibe.Models;
 using api_vibe.Options;
 using Microsoft.Extensions.Options;
 
@@ -78,6 +79,48 @@ public class GeminiClient : IGeminiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to fetch gas price from Gemini API");
+            throw;
+        }
+    }
+
+    public async Task<ScamDetectionResult> AnalyzeScamRiskAsync(string statementText, CancellationToken cancellationToken = default)
+    {
+        var apiKey = _options.ApiKey;
+        var model = _options.Model;
+        var endpoint = $"{_options.Endpoint}/v1beta/models/{model}:generateContent?key={apiKey}";
+
+        var prompt = $"Phân tích danh sách giao dịch ngân hàng sau đây và cho biết có nhận thấy dấu hiệu lừa đảo (scam) nào không. Trả về đúng định dạng JSON có cấu trúc {{ \"isScam\": boolean, \"confidenceScore\": number(0-1), \"reason\": string(mô tả chi tiết nếu có lừa đảo) }}. Không sinh thêm markdown hay text nào khác. Danh sách giao dịch:\n{statementText}";
+
+        var requestBody = new
+        {
+            contents = new[] { new { parts = new[] { new { text = prompt } } } },
+            generationConfig = new { responseMimeType = "application/json" }
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }), Encoding.UTF8, "application/json");
+
+        try
+        {
+            var response = await _httpClient.PostAsync(endpoint, content, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Gemini API Error (ScamDetection). Status: {Status}, Body: {Body}", response.StatusCode, errorBody);
+            }
+            response.EnsureSuccessStatusCode();
+
+            var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var document = JsonDocument.Parse(responseJson);
+            var text = document.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+
+            if (string.IsNullOrWhiteSpace(text)) return new ScamDetectionResult { IsScam = false };
+
+            var result = JsonSerializer.Deserialize<ScamDetectionResult>(text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return result ?? new ScamDetectionResult();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to analyze scam risk");
             throw;
         }
     }
