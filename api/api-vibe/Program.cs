@@ -29,6 +29,8 @@ builder.Services.Configure<GasPriceOptions>(
 
 builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
 builder.Services.AddScoped<IGasPriceService, GasPriceService>();
+builder.Services.AddScoped<IStatementProcessingService, StatementProcessingService>();
+builder.Services.AddScoped<ICheckScamService, CheckScamService>();
 
 var app = builder.Build();
 
