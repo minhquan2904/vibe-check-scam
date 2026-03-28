@@ -2,4 +2,5 @@ api/api-vibe/.vs/api-vibe/CopilotIndices/
 api/api-vibe/.vs/api-vibe/FileContentIndex/
 api/api-vibe/bin/
 api/api-vibe/obj/
+fe/node_modules
 test_gemini/
